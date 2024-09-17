@@ -60,15 +60,38 @@ function createWoman(request, response) {
   response.json(women);
 }
 
+// PATCH
+function patchWoman(request, response) {
+  function findWoman(woman) {
+    if (woman.id === request.params.id) {
+      return woman;
+    }
+  }
+
+  const findedWoman = women.find(findWoman);
+
+  if (request.body.name) {
+    findedWoman.name = request.body.name;
+  }
+
+  if (request.body.image) {
+    findedWoman.image = request.body.image;
+  }
+
+  if (request.body.minibio) {
+    findedWoman.minibio = request.body.minibio;
+  }
+
+  response.json(women);
+}
+
 // Função PORTA
 function showPort() {
   console.log("Servidor criado e rodando na porta ", port);
 }
 
-// Configuração rota GET /women
-app.use(router.get("/women", showWomen));
-
-// Configuração rota POST /women
-app.use(router.post("/women", createWoman));
+app.use(router.get("/women", showWomen)); // Configuração rota GET /women
+app.use(router.post("/women", createWoman)); // Configuração rota POST /women
+app.use(router.patch("/women/:id", patchWoman)); // Configuração da rota PATCH /women
 
 app.listen(port, showPort); // Servidor ouvindo a porta
