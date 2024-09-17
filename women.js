@@ -1,11 +1,9 @@
-// Criando o server
 const express = require("express"); // iniciando o express
+const router = express.Router(); // Configurando a primeira parte da rota
+const { v4: uuidv4 } = require("uuid"); // Importando uuid
 
-// Configurando a primeira parte da rota
-const router = express.Router();
-
-// Importando uuid
-const { v4: uuidv4 } = require("uuid");
+const connectDatabase = require("./database"); // Importando a função connectDatabase
+connectDatabase(); // Chamando a função que conecta o BD
 
 const app = express(); // Iniciando o app
 app.use(express.json()); // Tratando as requisições
