@@ -85,6 +85,19 @@ function patchWoman(request, response) {
   response.json(women);
 }
 
+// DELETE
+function deleteWoman(request, response) {
+  function allExceptHer(woman) {
+    if (woman.id !== request.params.id) {
+      return woman;
+    }
+  }
+
+  const remainWomen = women.filter(allExceptHer);
+
+  response.json(remainWomen);
+}
+
 // Função PORTA
 function showPort() {
   console.log("Servidor criado e rodando na porta ", port);
@@ -92,6 +105,7 @@ function showPort() {
 
 app.use(router.get("/women", showWomen)); // Configuração rota GET /women
 app.use(router.post("/women", createWoman)); // Configuração rota POST /women
-app.use(router.patch("/women/:id", patchWoman)); // Configuração da rota PATCH /women
+app.use(router.patch("/women/:id", patchWoman)); // Configuração da rota PATCH /women/:id
+app.use(router.delete("/women/:id", deleteWoman)); // Configuração da rota DETELE /women/:id
 
 app.listen(port, showPort); // Servidor ouvindo a porta
