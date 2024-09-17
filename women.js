@@ -1,99 +1,83 @@
 const express = require("express"); // iniciando o express
 const router = express.Router(); // Configurando a primeira parte da rota
-const { v4: uuidv4 } = require("uuid"); // Importando uuid
+const cors = require("cors"); // Importando o cors, que permite consumir essa api no front-end
 
 const connectDatabase = require("./database"); // Importando a função connectDatabase
 connectDatabase(); // Chamando a função que conecta o BD
 
+const Woman = require("./womanModel"); // Importando Schema
+
 const app = express(); // Iniciando o app
 app.use(express.json()); // Tratando as requisições
+app.use(cors());
+
 const port = 3333; // criando a porta
 
-// Lista inicial de mulheres
-const women = [
-  {
-    id: "1",
-    name: "Isabelle Jesuino",
-    image: "https://avatars.githubusercontent.com/u/96210375?v=4",
-    minibio: "Desenvolvedora Front-End",
-  },
-  {
-    id: "2",
-    name: "Simara Conceição",
-    image: "https://bit.ly/3LJIyOF",
-    minibio: "Desenvolvedora e instrutora",
-  },
-
-  {
-    id: "3",
-    name: "Iana Chan",
-    image: "https://bit.ly/3JCXBqP",
-    minibio: "CEO & Founder da PrograMaria",
-  },
-
-  {
-    id: "4",
-    name: "Luana Pimentel",
-    image: "https://bit.ly/3FKpFaz",
-    minibio: "Senior Staff Software Engineer",
-  },
-];
-
 // GET
-function showWomen(request, response) {
-  response.json(women);
+async function showWomen(request, response) {
+  try {
+    const womenFromDatabase = await Woman.find();
+
+    response.json(womenFromDatabase);
+  } catch (erro) {
+    console.log(erro);
+  }
 }
 
 // POST
-function createWoman(request, response) {
-  const newWoman = {
-    id: uuidv4(),
+async function createWoman(request, response) {
+  const newWoman = new Woman({
     name: request.body.name,
     image: request.body.image,
     minibio: request.body.minibio,
-  };
+    quote: request.body.quote,
+  });
 
-  women.push(newWoman);
-
-  response.json(women);
+  try {
+    const createdWoman = await newWoman.save();
+    response.status(201).json(createdWoman);
+  } catch (erro) {
+    console.log(erro);
+  }
 }
 
 // PATCH
-function patchWoman(request, response) {
-  function findWoman(woman) {
-    if (woman.id === request.params.id) {
-      return woman;
+async function patchWoman(request, response) {
+  try {
+    const findedWoman = await Woman.findById(request.params.id);
+
+    if (request.body.name) {
+      findedWoman.name = request.body.name;
     }
+
+    if (request.body.image) {
+      findedWoman.image = request.body.image;
+    }
+
+    if (request.body.minibio) {
+      findedWoman.minibio = request.body.minibio;
+    }
+
+    if (request.body.quote) {
+      findedWoman.quote = request.body.quote;
+    }
+
+    const updatedWoman = await findedWoman.save();
+
+    response.json(updatedWoman);
+  } catch (erro) {
+    console.log(erro);
   }
-
-  const findedWoman = women.find(findWoman);
-
-  if (request.body.name) {
-    findedWoman.name = request.body.name;
-  }
-
-  if (request.body.image) {
-    findedWoman.image = request.body.image;
-  }
-
-  if (request.body.minibio) {
-    findedWoman.minibio = request.body.minibio;
-  }
-
-  response.json(women);
 }
 
 // DELETE
-function deleteWoman(request, response) {
-  function allExceptHer(woman) {
-    if (woman.id !== request.params.id) {
-      return woman;
-    }
+async function deleteWoman(request, response) {
+  try {
+    await Woman.findByIdAndDelete(request.params.id);
+    response.json({ message: "Mulher deletada com sucesso!" });
+  } catch (erro) {
+    console.log(erro);
   }
-
-  const remainWomen = women.filter(allExceptHer);
-
-  response.json(remainWomen);
 }
 
 // Função PORTA
